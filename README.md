@@ -1,0 +1,196 @@
+# 5G MiFi Dashboard
+
+[🇨🇳 中文文档](README_CN.md)
+
+A web-based management interface for 5G MiFi devices running on embedded Linux systems (aarch64).
+
+> ⭐ **If you find this project useful, please give it a star!** It took a week of hard work to build this backend. Your support means a lot!
+
+## 📦 Versions
+
+This project provides two versions for different devices:
+
+| Version | Target Device | Git Branch | Features | Description |
+|:---:|:---:|:---:|:---:|:---|
+| **UDX710 Generic** | UNISOC UDX710 Platform | `main` | ⭐ Basic Features | For most UDX710 devices |
+| **SZ50 Dedicated** | SZ50 MiFi Device | `SZ50` | 🌟 Full Features | Extra: LED Control, Key Listener, WiFi Control, Factory Reset, Client Management |
+
+> 💡 **Switch Version**: `git checkout SZ50` for SZ50 version, `git checkout main` for generic version
+
+### SZ50 Dedicated Version Extra Features
+- 🔆 **LED Control** - Customize LED indicator status
+- 🔘 **Key Listener** - Physical button event response
+- 📶 **WiFi Control** - Full WiFi AP management
+- 🔄 **Factory Reset** - One-click restore to defaults
+- 👥 **Client Management** - Manage connected devices
+
+## ✨ Performance Highlights
+
+| Metric | This Project | Traditional (8080) |
+|--------|-------------|-------------------|
+| **Binary Size** | ~200 KB | ~6 MB |
+| **Memory Usage** (7h runtime) | ~1 MB | Much higher |
+
+Lightweight, efficient, and perfect for resource-constrained embedded devices!
+
+## Features
+
+### Network Management
+- **Modem Control**: View IMEI, ICCID, carrier info, signal strength
+- **Band Information**: Real-time display of network type, band, ARFCN, PCI, RSRP, RSRQ, SINR
+- **Cell Management**: View and manage cellular connections
+- **Traffic Statistics**: Monitor data usage with vnstat integration
+- **Traffic Control**: Set data limits and automatic network cutoff
+
+### WiFi Management
+- **AP Mode**: Configure WiFi hotspot (SSID, password, channel)
+- **Client Management**: View connected devices, kick clients
+- **DHCP Settings**: Configure IP range and lease time
+
+### System Features
+- **System Monitor**: CPU, memory, temperature monitoring
+- **SMS Management**: Send and receive SMS messages
+- **LED Control**: Manage device LED indicators
+- **Airplane Mode**: Toggle airplane mode
+- **Power Management**: Battery status, charging control
+- **OTA Update**: Over-the-air firmware updates
+- **Factory Reset**: Restore device to default settings
+- **Web Terminal**: Remote shell access
+- **AT Debug**: Direct AT command interface
+
+### UI Features
+- **Dark Mode**: Full dark/light theme support
+- **Responsive Design**: Mobile and desktop optimized
+- **Real-time Updates**: Live data refresh
+- **Chinese Interface**: Native Chinese language support
+
+## Architecture
+
+```
+├── src/                    # Backend (C)
+│   ├── main.c              # Entry point
+│   ├── mongoose.c/h        # HTTP server (Mongoose)
+│   ├── packed_fs.c         # Embedded static files
+│   ├── handlers/           # HTTP API handlers
+│   │   ├── http_server.c   # Route definitions
+│   │   └── handlers.c      # API implementations
+│   └── system/             # System modules
+│       ├── sysinfo.c       # System information
+│       ├── wifi.c          # WiFi control
+│       ├── sms.c           # SMS management
+│       ├── traffic.c       # Traffic statistics
+│       ├── modem.c         # Modem control
+│       ├── ofono.c         # oFono D-Bus integration
+│       ├── led.c           # LED control
+│       ├── charge.c        # Battery management
+│       ├── airplane.c      # Airplane mode
+│       ├── update.c        # OTA updates
+│       ├── factory_reset.c # Factory reset
+│       └── ...
+└── web/                    # Frontend (Vue 3)
+    ├── src/
+    │   ├── App.vue         # Main application
+    │   ├── components/     # Vue components
+    │   ├── composables/    # Vue composables
+    │   └── plugins/        # Plugins (FontAwesome)
+    ├── index.html
+    ├── package.json
+    ├── vite.config.js
+    └── tailwind.config.js
+```
+
+## Requirements
+
+### Backend
+- GCC cross-compiler (aarch64-linux-gnu)
+- GLib 2.0 (D-Bus support)
+- Target: Linux aarch64 (embedded device)
+
+### Frontend
+- Node.js 18+
+- npm or yarn
+
+## Build Instructions
+
+### Frontend
+```bash
+cd web
+npm install
+npm run build
+```
+
+### Backend
+```bash
+# Pack frontend into C source
+cd src
+# Generate packed_fs.c from web/dist
+
+# Cross-compile for aarch64
+make
+```
+
+### Makefile Configuration
+The backend uses cross-compilation targeting aarch64-linux-gnu. Ensure your toolchain is properly configured.
+
+## API Endpoints
+
+| Endpoint | Method | Description |
+|----------|--------|-------------|
+| `/api/sysinfo` | GET | System information |
+| `/api/wifi/config` | GET/POST | WiFi configuration |
+| `/api/wifi/clients` | GET | Connected clients |
+| `/api/sms/list` | GET | SMS messages |
+| `/api/sms/send` | POST | Send SMS |
+| `/api/traffic/stats` | GET | Traffic statistics |
+| `/api/traffic/limit` | POST | Set traffic limit |
+| `/api/modem/info` | GET | Modem information |
+| `/api/band/current` | GET | Current band info |
+| `/api/led/status` | GET/POST | LED control |
+| `/api/airplane` | GET/POST | Airplane mode |
+| `/api/update/check` | GET | Check for updates |
+| `/api/update/install` | POST | Install update |
+| `/api/factory-reset` | POST | Factory reset |
+| `/api/reboot` | POST | Reboot device |
+
+## Dependencies
+
+### Backend Libraries
+- [Mongoose](https://github.com/cesanta/mongoose) - Embedded HTTP server
+- GLib/GIO - D-Bus communication with oFono
+
+### Frontend Libraries
+- Vue 3 - UI framework
+- Vite - Build tool
+- TailwindCSS - Styling
+- FontAwesome - Icons
+
+## License
+
+This project is licensed under the GNU General Public License v3.0 - see the [LICENSE](LICENSE) file for details.
+
+## Contributing
+
+Contributions are welcome! Please feel free to submit a Pull Request.
+
+
+## ☕ Support the Project
+
+This project is completely open source and free. If you like this project, you can buy me a coffee~
+
+| Alipay | WeChat |
+|:---:|:---:|
+| ![Alipay](docs/alipay.png) | ![WeChat](docs/wechat.png) |
+
+## 💬 Community
+
+Welcome to join the discussion!
+
+- **QQ Group**: 1029148488
+
+## 🔗 License
+
+This project is licensed under **GPLv3 License**.
+
+Free to use, modify and distribute, but please keep the author attribution.
+
+Welcome to submit Issues / Pull Requests to improve the project 💡

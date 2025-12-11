@@ -1,0 +1,194 @@
+# 5G MiFi 管理面板
+
+基于Web的5G MiFi设备管理界面，运行于嵌入式Linux系统（aarch64）。
+
+> ⭐ **如果觉得这个项目有用，请点个Star支持一下！** 辛苦肝了一周的后台，您的支持是我最大的动力！
+
+## 📦 版本说明
+
+本项目提供两个版本，满足不同设备需求：
+
+| 版本类型 | 适用设备 | Git分支 | 功能支持 | 说明 |
+|:---:|:---:|:---:|:---:|:---|
+| **UDX710 通用版** | 展锐UDX710平台通用 | `main` | ⭐ 基础功能集 | 适用于大多数UDX710设备 |
+| **SZ50 专用版** | SZ50随身WiFi | `SZ50` | 🌟 全功能支持 | 额外支持：LED灯控制、按键监听、WiFi控制、恢复出厂设置、设备接入管理 |
+
+> 💡 **切换版本**: `git checkout SZ50` 切换到SZ50专用版，`git checkout main` 切换到通用版
+
+### SZ50专用版额外功能
+- 🔆 **LED灯控制** - 自定义LED指示灯状态
+- 🔘 **按键监听** - 物理按键事件响应
+- 📶 **WiFi控制** - 完整的WiFi AP管理
+- 🔄 **恢复出厂设置** - 一键恢复默认配置
+- 👥 **设备接入管理** - 管理连接的客户端设备
+
+## ✨ 性能亮点
+
+| 指标 | 本项目 | 传统方案 (8080) |
+|------|--------|----------------|
+| **打包体积** | ~200 KB | ~6 MB |
+| **内存占用** (运行7小时) | ~1 MB | 高得多 |
+
+轻量、高效，完美适配资源受限的嵌入式设备！
+
+## 功能特性
+
+### 网络管理
+- **Modem控制**：查看IMEI、ICCID、运营商信息、信号强度
+- **频段信息**：实时显示网络类型、频段、ARFCN、PCI、RSRP、RSRQ、SINR
+- **小区管理**：查看和管理蜂窝网络连接
+- **流量统计**：通过vnstat集成监控数据使用量
+- **流量控制**：设置流量限制和自动断网
+
+### WiFi管理
+- **AP模式**：配置WiFi热点（SSID、密码、信道）
+- **客户端管理**：查看已连接设备、踢出客户端
+- **DHCP设置**：配置IP范围和租约时间
+
+### 系统功能
+- **系统监控**：CPU、内存、温度监控
+- **短信管理**：收发短信
+- **LED控制**：管理设备LED指示灯
+- **飞行模式**：切换飞行模式
+- **电源管理**：电池状态、充电控制
+- **OTA更新**：空中固件升级
+- **恢复出厂**：恢复设备默认设置
+- **Web终端**：远程Shell访问
+- **AT调试**：直接AT命令接口
+
+### UI特性
+- **深色模式**：完整的深色/浅色主题支持
+- **响应式设计**：移动端和桌面端优化
+- **实时更新**：数据实时刷新
+- **中文界面**：原生中文语言支持
+
+## 项目架构
+
+```
+├── src/                    # 后端 (C语言)
+│   ├── main.c              # 入口点
+│   ├── mongoose.c/h        # HTTP服务器 (Mongoose)
+│   ├── packed_fs.c         # 嵌入式静态文件
+│   ├── handlers/           # HTTP API处理器
+│   │   ├── http_server.c   # 路由定义
+│   │   └── handlers.c      # API实现
+│   └── system/             # 系统模块
+│       ├── sysinfo.c       # 系统信息
+│       ├── wifi.c          # WiFi控制
+│       ├── sms.c           # 短信管理
+│       ├── traffic.c       # 流量统计
+│       ├── modem.c         # Modem控制
+│       ├── ofono.c         # oFono D-Bus集成
+│       ├── led.c           # LED控制
+│       ├── charge.c        # 电池管理
+│       ├── airplane.c      # 飞行模式
+│       ├── update.c        # OTA更新
+│       ├── factory_reset.c # 恢复出厂
+│       └── ...
+└── web/                    # 前端 (Vue 3)
+    ├── src/
+    │   ├── App.vue         # 主应用
+    │   ├── components/     # Vue组件
+    │   ├── composables/    # Vue组合式函数
+    │   └── plugins/        # 插件 (FontAwesome)
+    ├── index.html
+    ├── package.json
+    ├── vite.config.js
+    └── tailwind.config.js
+```
+
+## 环境要求
+
+### 后端
+- GCC交叉编译器 (aarch64-linux-gnu)
+- GLib 2.0 (D-Bus支持)
+- 目标平台：Linux aarch64（嵌入式设备）
+
+### 前端
+- Node.js 18+
+- npm 或 yarn
+
+## 编译说明
+
+### 前端编译
+```bash
+cd web
+npm install
+npm run build
+```
+
+### 后端编译
+```bash
+# 将前端打包到C源码
+cd src
+# 从 web/dist 生成 packed_fs.c
+
+# 交叉编译到aarch64
+make
+```
+
+### Makefile配置
+后端使用交叉编译，目标平台为aarch64-linux-gnu。请确保工具链正确配置。
+
+## API接口
+
+| 接口 | 方法 | 描述 |
+|------|------|------|
+| `/api/sysinfo` | GET | 系统信息 |
+| `/api/wifi/config` | GET/POST | WiFi配置 |
+| `/api/wifi/clients` | GET | 已连接客户端 |
+| `/api/sms/list` | GET | 短信列表 |
+| `/api/sms/send` | POST | 发送短信 |
+| `/api/traffic/stats` | GET | 流量统计 |
+| `/api/traffic/limit` | POST | 设置流量限制 |
+| `/api/modem/info` | GET | Modem信息 |
+| `/api/band/current` | GET | 当前频段信息 |
+| `/api/led/status` | GET/POST | LED控制 |
+| `/api/airplane` | GET/POST | 飞行模式 |
+| `/api/update/check` | GET | 检查更新 |
+| `/api/update/install` | POST | 安装更新 |
+| `/api/factory-reset` | POST | 恢复出厂设置 |
+| `/api/reboot` | POST | 重启设备 |
+
+## 依赖库
+
+### 后端依赖
+- [Mongoose](https://github.com/cesanta/mongoose) - 嵌入式HTTP服务器
+- GLib/GIO - 与oFono的D-Bus通信
+
+### 前端依赖
+- Vue 3 - UI框架
+- Vite - 构建工具
+- TailwindCSS - 样式框架
+- FontAwesome - 图标库
+
+## 许可证
+
+本项目采用 GNU通用公共许可证v3.0 - 详见 [LICENSE](LICENSE) 文件。
+
+## 贡献
+
+欢迎贡献代码！请随时提交Pull Request。
+
+
+## ☕ 支持项目
+
+本项目完全开源免费，如果你喜欢这个项目的话，也可以请我喝一杯咖啡~
+
+| 支付宝 | 微信赞赏 |
+|:---:|:---:|
+| ![支付宝](docs/alipay.png) | ![微信](docs/wechat.png) |
+
+## 💬 社区讨论
+
+欢迎加入群聊一起讨论！
+
+- **QQ群**: 1029148488
+
+## 🔗 开源协议
+
+本项目遵循 **GPLv3 License**
+
+可自由使用、修改与分发，但请保留作者署名。
+
+欢迎提交 Issue / Pull Request 一起完善项目 💡
